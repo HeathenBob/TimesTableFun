@@ -12,7 +12,8 @@
 @implementation FEAppleTheme
 
 -(id)init {
-    if (self = [super init])  {
+    self = [super init];
+    if (self != nil)  {
         
         if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
             self.normalButtonImage = [UIImage imageNamed:@"apple_red~ipad.png"];
