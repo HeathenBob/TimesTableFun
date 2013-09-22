@@ -19,6 +19,8 @@
 @synthesize layoutPanel;
 @synthesize buttonTimer;
 @synthesize topBar;
+@synthesize bottomBar;
+@synthesize freyaImage;
 
 - (void) dealloc {
     [myDelegate release];
@@ -41,11 +43,18 @@
         labels = [NSMutableArray arrayWithCapacity:100];
         level = 2;
     }
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+        animationDuration = 2.5;
+    } else {
+        animationDuration = 1.5;
+    }
     return self;
 }
 
 - (void)viewDidLoad
 {
+    
+    
     NSURL* audioFile = [NSURL fileURLWithPath:[[NSBundle mainBundle] 
 											   pathForResource:@"correct" 
 											   ofType:@"caf"]]; 
@@ -66,6 +75,27 @@
 }
 
 - (void) viewWillAppear:(BOOL)animated {
+    UINavigationBar *bar = self.navigationController.navigationBar;
+    if (bar != nil) {
+        if ([bar respondsToSelector:@selector(setBarTintColor:)]) {
+            [bar setBarTintColor:[self.myDelegate.selectedTheme color5]];
+            [bar setTintColor:[UIColor colorWithRed:215.0/255.0 green:215.0/255.0 blue:215.0/255.0 alpha:1.0]];
+            bar.titleTextAttributes = [NSDictionary dictionaryWithObject:[UIColor whiteColor] forKey:UITextAttributeTextColor];
+            [bar setTranslucent:NO];
+            [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent];
+        } else {
+            [bar setTintColor:[self.myDelegate.selectedTheme color5]];
+        }
+    }
+    [self.bottomBar setBackgroundColor:[self.myDelegate.selectedTheme color5]];
+    [self.instructionLabel setHighlightedTextColor:[self.myDelegate.selectedTheme highlightTextColor]];
+    [self.instructionLabel setTextColor:[self.myDelegate.selectedTheme textColor]];
+    [self.countdownButton setBackgroundImage:[UIImage imageNamed:@"bigredbutton.png"] forState:UIControlStateNormal];
+    [self.countdownButton setBackgroundImage:[UIImage imageNamed:@"bigredbutton.png"] forState:UIControlStateSelected];
+    [self.countdownButton setBackgroundImage:[UIImage imageNamed:@"bigredbutton.png"] forState:UIControlStateHighlighted];
+    [self.countdownButton setBackgroundImage:[UIImage imageNamed:@"bigredbutton.png"] forState:UIControlStateDisabled];
+    [self.countdownButton setBackgroundImage:[UIImage imageNamed:@"bigredbutton.png"] forState:UIControlStateApplication];
+    [self.countdownButton setBackgroundImage:[UIImage imageNamed:@"bigredbutton.png"] forState:UIControlStateReserved];
     score = 0;
     int selectedNumber = self.myDelegate.selectedNumber;
     float width = 20.0;
@@ -84,8 +114,9 @@
     lpFrame.origin.x = xCenter - (lpFrame.size.width/2.0);
     self.layoutPanel.frame = lpFrame;
     
+    
     CGRect rect = self.nextButton.frame;
-    rect.origin.y = self.layoutPanel.frame.origin.y + self.layoutPanel.frame.size.height - 10.0;
+    rect.origin.y = self.freyaImage.frame.origin.y  - (20.0 + self.nextButton.frame.size.height);
     rect.origin.x = -100;
     self.nextButton.frame = rect;
     
@@ -110,7 +141,7 @@
 
 - (void) layoutSquares {
     [UIView beginAnimations:nil context:nil];
-    [UIView setAnimationDuration:2.0];
+    [UIView setAnimationDuration:animationDuration];
     [UIView setAnimationCurve:UIViewAnimationCurveEaseIn];
     beingPressed = NO;
     [self clearBoard];
@@ -120,15 +151,22 @@
         //[numberLabel displayValue];
         [self.layoutPanel addSubview:numberLabel];
     }
-    buttonNumber = (selectedNumber*level) + selectedNumber + (arc4random() % 5);
+    buttonNumber = (selectedNumber*level) + 5 + (arc4random() % 5);
     int rand = arc4random() % 6;
     FETheme *theme = [[FETheme alloc] init];
-    if (rand == 1) {
+    
+    if (rand % 2 == 0) {
         [self.countdownButton setTitleColor:[theme color1] forState:UIControlStateNormal];
-    } else if (rand == 1) {
+        [self.countdownButton setTitleColor:[theme color2] forState:UIControlStateSelected];
+        [self.countdownButton setTitleColor:[theme color4] forState:UIControlStateHighlighted];
+    } else  {
         [self.countdownButton setTitleColor:[theme color2] forState:UIControlStateNormal];
-    } else if (rand == 2) {
-        [self.countdownButton setTitleColor:[theme color3] forState:UIControlStateNormal];
+        [self.countdownButton setTitleColor:[theme color1] forState:UIControlStateSelected];
+        [self.countdownButton setTitleColor:[theme color4] forState:UIControlStateHighlighted];
+    }
+    /*
+    else if (rand == 2) {
+        [self.countdownButton setTitleColor:[theme color6] forState:UIControlStateNormal];
     } else if (rand == 3) {
         [self.countdownButton setTitleColor:[theme color4] forState:UIControlStateNormal];
     } else if (rand == 4) {
@@ -136,6 +174,8 @@
     } else {
         [self.countdownButton setTitleColor:[theme color6] forState:UIControlStateNormal];
     }
+     */
+    
     [self.countdownButton setTitle:[NSString stringWithFormat:@"%i", buttonNumber] forState:UIControlStateNormal];
     CGRect lpFrame = self.layoutPanel.frame;
     float centerX = lpFrame.origin.x + (lpFrame.size.width/2.0);
@@ -160,6 +200,7 @@
     
     NSString *instructionText = NSLocalizedStringWithDefaultValue(@"Freya: count squares", @"Localizable", [NSBundle mainBundle], @"How many squares? Press the button when it shows the correct answer.",@"How many squares? Press the button when it shows the correct answer."); 
     [self.instructionLabel setText: instructionText];
+    self.instructionLabel.highlighted = NO;
     float time = 0.8 + (0.1 * selectedNumber);
     self.buttonTimer = [NSTimer scheduledTimerWithTimeInterval:time target:self selector:@selector(decrementButton) userInfo:nil repeats:YES];
     [self.buttonTimer fire];
@@ -170,8 +211,8 @@
     int selectedNumber = self.myDelegate.selectedNumber;
     if (beingPressed == NO) {
         buttonNumber--;
-        if (buttonNumber < 1 || buttonNumber < (selectedNumber * level) - 10 || (buttonNumber < (selectedNumber * level) - 5 && buttonNumber % 10 == 0)) {
-            buttonNumber = (selectedNumber*level) + selectedNumber + (arc4random() % 5);
+        if (buttonNumber < 1 || buttonNumber < ((selectedNumber * level) - 7) || (buttonNumber < ((selectedNumber * level) - 5) && buttonNumber % 10 == 0)) {
+            buttonNumber = (selectedNumber*level) + 5 + (arc4random() % 5);
         }
         [self.countdownButton setTitle:[NSString stringWithFormat:@"%i", buttonNumber] forState:UIControlStateNormal];
     }
@@ -191,24 +232,28 @@
         if (level < 10) {
             NSString *correctText = NSLocalizedStringWithDefaultValue(@"Freya: correct", @"Localizable", [NSBundle mainBundle], @"CORRECT - press next for another sum", @"CORRECT - press next for another sum"); 
             [self.instructionLabel setText:correctText];
+            self.instructionLabel.highlighted = YES;
         } else {
             NSString *nextText = NSLocalizedStringWithDefaultValue(@"Freya: Press next to see your score", @"Localizable", [NSBundle mainBundle], @"Correct. Press next to see your score",@"Correct. Press next to see your score"); 
             [self.instructionLabel setText:nextText];
+            self.instructionLabel.highlighted = YES;
         }
-        self.countdownButton.hidden = YES;
+        
         CGRect rect = self.nextButton.frame;
-        rect.origin.y = self.layoutPanel.frame.origin.y + self.layoutPanel.frame.size.height - 10.0;
+        rect.origin.y = self.freyaImage.frame.origin.y  - (20.0 + self.nextButton.frame.size.height);
         rect.origin.x = -100;
         self.nextButton.frame = rect;
+        
         self.nextButton.hidden = NO;
         
         [UIView beginAnimations:nil context:nil];
-        [UIView setAnimationDuration:2.0];
+        [UIView setAnimationDuration:animationDuration];
         [UIView setAnimationCurve:UIViewAnimationCurveEaseOut];
        
-        rect.origin.x = self.layoutPanel.frame.origin.x + self.layoutPanel.frame.size.width - rect.size.width;
-        
+        rect.origin.x = self.layoutPanel.frame.origin.x + self.layoutPanel.frame.size.width ;//- self.nextButton.frame.size.width;
+        //self.countdownButton.hidden = YES;
         self.nextButton.frame = rect;
+        
         [UIView commitAnimations];
         NSArray *subViews =[self.layoutPanel subviews];
         for (int v = 0; v < [subViews count]; v++) {
@@ -224,6 +269,7 @@
         }
         NSString *wrongText = NSLocalizedStringWithDefaultValue(@"Freya: wrong try again", @"Localizable", [NSBundle mainBundle], @"SORRY - Wrong answer, try again", @"SORRY - Wrong answer, try again"); 
         [self.instructionLabel setText:wrongText];
+        self.instructionLabel.highlighted = YES;
         [NSTimer scheduledTimerWithTimeInterval:2.0 target:self selector:@selector(starCountDownAgain:) userInfo:nil repeats:NO];
     }
 }
@@ -237,17 +283,19 @@
     level++;
     
     [UIView beginAnimations:@"next_button_animation" context:NULL];
-	[UIView setAnimationDuration:2.0];
+	[UIView setAnimationDuration:animationDuration];
 	[UIView setAnimationCurve:UIViewAnimationCurveEaseOut];
     [UIView setAnimationDelegate:self];
     [UIView setAnimationDidStopSelector:@selector(animationFinished:finished:context:)];
+    
+    
 	CGRect rect = self.nextButton.frame;
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
         rect.origin.x = 1030;
     } else {
-        rect.origin.x = 330;
+        rect.origin.x = 360;
     }
-    rect.origin.y = self.layoutPanel.frame.origin.y + self.layoutPanel.frame.size.height - 10.0;
+    rect.origin.y = self.freyaImage.frame.origin.y  - (20.0 + self.nextButton.frame.size.height);
 	self.nextButton.frame = rect;
     
 	[UIView commitAnimations];
@@ -260,6 +308,7 @@
 - (void)animationFinished:(NSString *)animationID finished:(BOOL)finished context:(void *)context {
     
     if (level <= 10) {
+        
         CGRect rect = self.nextButton.frame;
         rect.origin.x = -100;
         self.nextButton.frame = rect;
@@ -289,16 +338,18 @@
             [self.instructionLabel setText:[NSString stringWithFormat:rubbish, score, self.myDelegate.userName]];
             
         }
-        
+        self.instructionLabel.highlighted = NO;
         
         CGRect rect = self.nextButton.frame;
         rect.origin.x = -100;
+        
+        
         self.nextButton.frame = rect;
         [UIView beginAnimations:nil context:nil];
-        [UIView setAnimationDuration:2.0];
+        [UIView setAnimationDuration:animationDuration];
         [UIView setAnimationCurve:UIViewAnimationCurveEaseOut];
         
-        rect.origin.x = self.layoutPanel.frame.origin.x + self.layoutPanel.frame.size.width - rect.size.width;
+        rect.origin.x = self.layoutPanel.frame.origin.x + self.layoutPanel.frame.size.width;// s - rect.size.width;
         self.nextButton.frame = rect;
         
         [UIView commitAnimations];
@@ -317,8 +368,7 @@
 
 
 
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
-{
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
 	// Return YES for supported orientations
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
         if (interfaceOrientation == UIInterfaceOrientationLandscapeLeft || interfaceOrientation == UIInterfaceOrientationLandscapeRight) {
@@ -333,8 +383,9 @@
             layoutPanel.frame = frame;
         }
         
+        
         CGRect rect = self.nextButton.frame;
-        rect.origin.y = self.layoutPanel.frame.origin.y + self.layoutPanel.frame.size.height - 10.0;
+        rect.origin.y = self.freyaImage.frame.origin.y  - (20.0 + self.nextButton.frame.size.height);
         self.nextButton.frame = rect;
         
         CGRect lpFrame = self.layoutPanel.frame;
@@ -358,6 +409,97 @@
         return YES;
     } else {
         return (interfaceOrientation == UIInterfaceOrientationPortrait);
+    }
+}
+
+- (BOOL)shouldAutorotate {
+    
+    UIInterfaceOrientation interfaceOrientation = [[UIApplication sharedApplication] statusBarOrientation];
+    
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+        /*
+        if (interfaceOrientation == UIInterfaceOrientationLandscapeLeft || interfaceOrientation == UIInterfaceOrientationLandscapeRight) {
+            self.topBar.hidden = YES;
+            CGRect frame = layoutPanel.frame;
+            frame.origin.y = 10.0;
+            layoutPanel.frame = frame;
+        } else {
+            self.topBar.hidden = NO;
+            CGRect frame = layoutPanel.frame;
+            frame.origin.y = 113.0;
+            layoutPanel.frame = frame;
+        }
+        
+        
+        CGRect rect = self.nextButton.frame;
+        rect.origin.y = self.freyaImage.frame.origin.y  - (20.0 + self.nextButton.frame.size.height);
+        self.nextButton.frame = rect;
+        
+        CGRect lpFrame = self.layoutPanel.frame;
+        float centerX = lpFrame.origin.x + (lpFrame.size.width/2.0);
+        float width = 20.0;
+        float height = 20.0;
+        float gap = 2.0;
+        float yOffset = 2.0;
+        if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+            width = 40.0;
+            height = 40.0;
+            gap = 4.0;
+            yOffset = 4.0;
+        }
+        float buttonY = lpFrame.origin.y + (level * (height + gap)) + yOffset + 10.0;
+        CGRect buttonFrame = self.countdownButton.frame;
+        float buttonX = centerX - (buttonFrame.size.width/2);
+        buttonFrame.origin.x = buttonX;
+        buttonFrame.origin.y = buttonY;
+        self.countdownButton.frame = buttonFrame;
+         */
+        return YES;
+    } else {
+        return (interfaceOrientation == UIInterfaceOrientationPortrait);
+    }
+
+}
+
+- (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation {
+    UIInterfaceOrientation interfaceOrientation = [[UIApplication sharedApplication] statusBarOrientation];
+    
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+        if (interfaceOrientation == UIInterfaceOrientationLandscapeLeft || interfaceOrientation == UIInterfaceOrientationLandscapeRight) {
+            self.topBar.hidden = YES;
+            CGRect frame = layoutPanel.frame;
+            frame.origin.y = 10.0;
+            layoutPanel.frame = frame;
+        } else {
+            self.topBar.hidden = NO;
+            CGRect frame = layoutPanel.frame;
+            frame.origin.y = 113.0;
+            layoutPanel.frame = frame;
+        }
+        
+        
+        CGRect rect = self.nextButton.frame;
+        rect.origin.y = self.freyaImage.frame.origin.y  - (20.0 + self.nextButton.frame.size.height);
+        self.nextButton.frame = rect;
+        
+        CGRect lpFrame = self.layoutPanel.frame;
+        float centerX = lpFrame.origin.x + (lpFrame.size.width/2.0);
+        float width = 20.0;
+        float height = 20.0;
+        float gap = 2.0;
+        float yOffset = 2.0;
+        if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+            width = 40.0;
+            height = 40.0;
+            gap = 4.0;
+            yOffset = 4.0;
+        }
+        float buttonY = lpFrame.origin.y + (level * (height + gap)) + yOffset + 10.0;
+        CGRect buttonFrame = self.countdownButton.frame;
+        float buttonX = centerX - (buttonFrame.size.width/2);
+        buttonFrame.origin.x = buttonX;
+        buttonFrame.origin.y = buttonY;
+        self.countdownButton.frame = buttonFrame;
     }
 }
 

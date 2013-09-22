@@ -30,20 +30,38 @@
 		self.title = titleString;
 		
     }
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+        animationDuration = 2.5;
+    } else {
+        animationDuration = 1.5;
+    }
     return self;
 }
 
 
-/*
+
 // Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
 - (void)viewDidLoad {
+    UINavigationBar *bar = self.navigationController.navigationBar;
+    if (bar != nil) {
+        if ([bar respondsToSelector:@selector(setBarTintColor:)]) {
+            [bar setBarTintColor:[self.myDelegate.selectedTheme color6]];
+            [bar setTintColor:[UIColor colorWithRed:215.0/255.0 green:215.0/255.0 blue:215.0/255.0 alpha:1.0]];
+            bar.titleTextAttributes = [NSDictionary dictionaryWithObject:[UIColor whiteColor] forKey:UITextAttributeTextColor];
+            [bar setTranslucent:NO];
+            [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent];
+        } else {
+            [bar setTintColor:[self.myDelegate.selectedTheme color6]];
+        }
+    }
     [super viewDidLoad];
 }
-*/
+
 
 - (void) viewWillAppear:(BOOL)animated {
 	NSString *enterName = NSLocalizedStringWithDefaultValue(@"Freya: Type name", @"Localizable", [NSBundle mainBundle], @"Type your name, then tap on the bus", @"Type your name, then tap on the bus");
 	[self.instructionLabel setText:enterName];
+    [self.instructionLabel setTextColor:[self.myDelegate.selectedTheme textColor]];
 	NSString *labelName = NSLocalizedStringWithDefaultValue(@"Label: name", @"Localizable", [NSBundle mainBundle], @"my name is", @"my name is");
 	[self.nameLabel setText:labelName];
 	CGRect rect = self.nextButton.frame;
@@ -56,14 +74,22 @@
 }
 
 
+
 // Override to allow orientations other than the default portrait orientation.
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
-    // Return YES for supported orientations.
-    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
-        return (interfaceOrientation == UIInterfaceOrientationPortrait);
-    } else {
+    // Return YES for supported orientations
+    return (interfaceOrientation == UIInterfaceOrientationPortrait);
+}
+
+- (BOOL)shouldAutorotate {
+    UIInterfaceOrientation interfaceOrientation = [[UIApplication sharedApplication] statusBarOrientation];
+    
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
         return YES;
+    } else {
+        return (interfaceOrientation == UIInterfaceOrientationPortrait);
     }
+    
 }
 
 
@@ -90,13 +116,13 @@
 	}
 	[self.nameField resignFirstResponder];
 	[UIView beginAnimations:nil context:nil];
-	[UIView setAnimationDuration:1.0];
+	[UIView setAnimationDuration:animationDuration];
 	[UIView setAnimationCurve:UIViewAnimationCurveEaseOut];
 	CGRect rect = self.nextButton.frame;
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
-        rect.origin.x = 1030;
+        rect.origin.x = 1130;
     } else {
-        rect.origin.x = 330;
+        rect.origin.x = 360;
     }
 	self.nextButton.frame = rect;
 	[UIView commitAnimations];

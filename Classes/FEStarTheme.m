@@ -14,19 +14,19 @@
 
 -(id)init {
     if (self = [super init])  {
-        
+        /*
 		if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
             self.normalButtonImage = [UIImage imageNamed:@"star_blue~ipad.png"];
             self.selectedButtonImage = [UIImage imageNamed:@"star_green~ipad.png"];
             self.highlightButtonImage = [UIImage imageNamed:@"star_pink~ipad.png"];
             self.disabledButtonImage = [UIImage imageNamed:@"star_grey~ipad.png"];
         } else {
-         
+         */
             self.normalButtonImage = [UIImage imageNamed:@"star_blue.png"];
-            self.selectedButtonImage = [UIImage imageNamed:@"star_green.png"];
-            self.highlightButtonImage = [UIImage imageNamed:@"star_pink.png"];
+            self.selectedButtonImage = [UIImage imageNamed:@"star_pink.png"];
+            self.highlightButtonImage = [UIImage imageNamed:@"star_green.png"];
             self.disabledButtonImage = [UIImage imageNamed:@"star_grey.png"];
-       }
+       //}
     }
     return self;
 }

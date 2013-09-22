@@ -29,7 +29,8 @@
 	NSInteger finishing;
 	IBOutlet UILabel *instructionLabel;
 	IBOutlet UITextView *highScoresLabel;
-	IBOutlet UIImageView *instructionImage;
+	IBOutlet UIImageView *freyaImage;
+    IBOutlet UIImageView *stripeImage;
 	IBOutlet UIView *topBar;
     IBOutlet UIView *bottomBar;
 	BOOL gamePaused;
@@ -46,7 +47,8 @@
 @property NSInteger finishing;
 @property (nonatomic, retain) IBOutlet UILabel *instructionLabel;
 @property (nonatomic, retain) IBOutlet UITextView *highScoresLabel;
-@property (nonatomic, retain) IBOutlet UIImageView *instructionImage;
+@property (nonatomic, retain) IBOutlet UIImageView *freyaImage;
+@property (nonatomic, retain) IBOutlet UIImageView *stripeImage;
 @property (nonatomic, retain) IBOutlet UIView *topBar;
 @property (nonatomic, retain) IBOutlet UIView *bottomBar;
 @property BOOL gamePaused;
@@ -56,7 +58,7 @@
 - (void) playSuccessSound;
 - (void) playSorrySound;
 - (void) playOopsSound;
-- (void) recordHighScore;
+- (void) recordHighScore:(NSTimer *)timer;
 - (void) numberButtonClicked:(id)sender;
 
 

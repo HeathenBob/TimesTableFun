@@ -28,6 +28,8 @@
 @synthesize needsTurningBack;
 @synthesize highScoresLabel;
 @synthesize playingSurface;
+@synthesize smileView;
+@synthesize bottomBar;
 
 // The designated initializer. Override to perform setup that is required before the view is loaded.
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
@@ -63,17 +65,51 @@
 
 // Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
 - (void)viewDidLoad {
+    
 	NSURL* audioFile = [NSURL fileURLWithPath:[[NSBundle mainBundle] 
 											   pathForResource:@"drums" 
 											   ofType:@"aiff"]]; 
 	AudioServicesCreateSystemSoundID((CFURLRef)audioFile, &successSound); 
-	[self.scoreLabel setBackgroundColor:[UIColor whiteColor]];
+	[self.scoreLabel setBackgroundColor:[UIColor clearColor]];
 	[super viewDidLoad];
 }
 
 - (void) viewWillAppear:(BOOL)animated {
+    UINavigationBar *bar = self.navigationController.navigationBar;
+    if (bar != nil) {
+        if ([bar respondsToSelector:@selector(setBarTintColor:)]) {
+            [bar setBarTintColor:[self.myDelegate.selectedTheme color2]];
+            [bar setTintColor:[UIColor colorWithRed:215.0/255.0 green:215.0/255.0 blue:215.0/255.0 alpha:1.0]];
+            bar.titleTextAttributes = [NSDictionary dictionaryWithObject:[UIColor whiteColor] forKey:UITextAttributeTextColor];
+            [bar setTranslucent:NO];
+            [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent];
+        } else {
+            [bar setTintColor:[self.myDelegate.selectedTheme color2]];
+        }
+    }
+    [self.bottomBar setBackgroundColor:[self.myDelegate.selectedTheme color2]];
+    [self.instructionLabel setTextColor:[self.myDelegate.selectedTheme textColor]];
+    [self.instructionLabel setHighlightedTextColor:[self.myDelegate.selectedTheme highlightTextColor]];
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+        UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
+        if (UIInterfaceOrientationIsPortrait(orientation)) {
+            //NSLog(@"portrait default");
+            self.smileView.hidden = NO;
+            self.instructionLabel.hidden = NO;
+            self.bottomBar.hidden = NO;
+        } else {
+            //NSLog(@"Landscape left");
+            self.smileView.hidden = YES;
+            self.instructionLabel.hidden = YES;
+            self.bottomBar.hidden = YES;
+        }
+    }
 	[self deal];
 	[super viewWillAppear:animated];
+}
+
+-(BOOL)isFourInchScreen {
+    return ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone && [UIScreen mainScreen].bounds.size.height == 568.0);
 }
 
 - (void) deal {
@@ -91,7 +127,8 @@
 	self.tries = 0;
 	self.score = 0;
 	NSString *instructionText1 = NSLocalizedStringWithDefaultValue(@"Freya: tap one red one blue", @"Localizable", [NSBundle mainBundle], @"Tap one red card and one blue to find a pair", @"Tap one red card and one blue to find a pair"); 
-	[instructionLabel setText:instructionText1];
+	[self.instructionLabel setText:instructionText1];
+    self.instructionLabel.highlighted = NO;
 	self.redCards = [NSMutableArray arrayWithCapacity:10];
 	self.blueCards = [NSMutableArray arrayWithCapacity:10];
 	self.timesByValues = [NSMutableArray arrayWithCapacity:10];
@@ -101,6 +138,10 @@
 	[self randomizeArray:self.timesByValues];
 	int hCount = 1;
 	int vCount = 1;
+    float extraGap  = 0.0;
+    if ([self isFourInchScreen]) {
+        extraGap = 65.0;
+    }
 	for (int i = 0; i < 10; i++) {
 		FECard *card = [FECard buttonWithType:UIButtonTypeCustom];
         card.userInteractionEnabled = YES;
@@ -125,7 +166,7 @@
 	for (int i = 0; i < 10; i++) {
 		FECard2 *card2 = [FECard2 buttonWithType:UIButtonTypeCustom];
         card2.userInteractionEnabled = YES;
-		card2.frame = CGRectMake((leftOffset + (cardWidth + gap) * (hCount2 - 1)), (topOffset + (cardHeight + gap) * (vCount - 1 + vCount2 - 1)), cardWidth, cardHeight);
+		card2.frame = CGRectMake((leftOffset + (cardWidth + gap) * (hCount2 - 1)), (topOffset + extraGap +  (cardHeight + gap) * (vCount - 1 + vCount2 - 1)), cardWidth, cardHeight);
 		[card2 setPos:i];
 		[self.blueCards addObject:card2];
 		[self.playingSurface addSubview:card2];
@@ -149,13 +190,6 @@
 	}
 }
 
-/*
-// Override to allow orientations other than the default portrait orientation.
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
-    // Return YES for supported orientations
-    return (interfaceOrientation == UIInterfaceOrientationPortrait);
-}
-*/
 
 - (void)didReceiveMemoryWarning {
 	// Releases the view if it doesn't have a superview.
@@ -183,7 +217,8 @@
 						[self seeIfSame];
 					} else {
 						NSString *instructionTextBlue = NSLocalizedStringWithDefaultValue(@"Freya: Now tap blue", @"Localizable", [NSBundle mainBundle], @"Now tap a blue card", @"Now tap a blue card"); 
-						[instructionLabel setText:instructionTextBlue];
+						[self.instructionLabel setText:instructionTextBlue];
+                        self.instructionLabel.highlighted = YES;
 					}
 					
 				} else {
@@ -205,7 +240,8 @@
 			}
 		} @catch (NSException * e) {
 			NSString *instructionText1 = NSLocalizedStringWithDefaultValue(@"Freya: tap one red one blue", @"Localizable", [NSBundle mainBundle], @"Tap one red card and one blue to find a pair", @"Tap one red card and one blue to find a pair"); 
-			[instructionLabel setText:instructionText1];
+			[self.instructionLabel setText:instructionText1];
+            self.instructionLabel.highlighted = YES;
 		}
 	}
 }
@@ -220,6 +256,7 @@
 		self.openBlueValue = -1;
 		NSString *instructionText1 = NSLocalizedStringWithDefaultValue(@"Freya: tap one red one blue", @"Localizable", [NSBundle mainBundle], @"Tap one red card and one blue to find a pair", @"Tap one red card and one blue to find a pair"); 
 		[instructionLabel setText:instructionText1];
+        self.instructionLabel.highlighted = NO;
 		self.needsTurningBack = NO;
 	}
 	
@@ -235,11 +272,16 @@
 	self.openBlueValue = -1;
 	NSString *wellDone = NSLocalizedStringWithDefaultValue(@"Freya: Well done", @"Localizable", [NSBundle mainBundle], @"WELL DONE %@", @"WELL DONE %@"); 
 	[instructionLabel setText:[NSString stringWithFormat:wellDone,self.myDelegate.userName]];
+    self.instructionLabel.highlighted = NO;
 }
 
 - (void) seeIfSame {
 	tries ++;
-	[self.scoreLabel setBackgroundColor:[self.myDelegate.selectedTheme color3]];
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+        [self.scoreLabel setBackgroundColor:[UIColor clearColor]];
+    } else {
+        [self.scoreLabel setBackgroundColor:[self.myDelegate.selectedTheme color3]];
+    }
 	[self.scoreLabel setTextColor:[self.myDelegate.selectedTheme textColor]];
 	if (self.openRedValue == self.openBlueValue) {
 		//self.mainTimer = [NSTimer scheduledTimerWithTimeInterval:20 target:self selector:@selector(removeTwo) userInfo:nil repeats:NO];
@@ -251,6 +293,7 @@
 		//[self.mainTimer fire];
 		NSString *hardLuck = NSLocalizedStringWithDefaultValue(@"Freya: Pairs hard luck", @"Localizable", [NSBundle mainBundle], @"Hard luck. Wait a few seconds to try again.", @"Hard luck. Wait a few seconds to try again."); 
 		[instructionLabel setText:hardLuck];
+        self.instructionLabel.highlighted = NO;
 		self.needsTurningBack = YES;
 		[self performSelector:@selector(turnTwoBack) withObject:nil afterDelay:4.0f];
 	}
@@ -358,6 +401,7 @@ int memberSort2(id item1, id item2, void *context) {
 					} else {
 						NSString *instructionTextRed = NSLocalizedStringWithDefaultValue(@"Freya: Now tap red", @"Localizable", [NSBundle mainBundle], @"Now tap a red card", @"Now tap a red card"); 
 						[instructionLabel setText:instructionTextRed];
+                        self.instructionLabel.highlighted = YES;
 					}
 
 				} else {
@@ -391,13 +435,37 @@ int memberSort2(id item1, id item2, void *context) {
 }
 
 
+
 // Override to allow orientations other than the default portrait orientation.
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
     // Return YES for supported orientations
+    return (interfaceOrientation == UIInterfaceOrientationPortrait);
+}
+
+- (BOOL)shouldAutorotate {
+    UIInterfaceOrientation interfaceOrientation = [[UIApplication sharedApplication] statusBarOrientation];
+    
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
-        return (interfaceOrientation == UIInterfaceOrientationPortrait);
+        return YES;
     } else {
         return (interfaceOrientation == UIInterfaceOrientationPortrait);
+    }
+    
+}
+- (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation {
+    
+    UIInterfaceOrientation interfaceOrientation = [[UIApplication sharedApplication] statusBarOrientation];
+    
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+        if (interfaceOrientation == UIInterfaceOrientationPortrait || interfaceOrientation == UIInterfaceOrientationPortraitUpsideDown) {
+            self.smileView.hidden = NO;
+            self.instructionLabel.hidden = NO;
+            self.bottomBar.hidden = NO;
+        } else {
+            self.smileView.hidden = YES;
+            self.instructionLabel.hidden = YES;
+            self.bottomBar.hidden = YES;
+        }
     }
 }
 
@@ -412,6 +480,7 @@ int memberSort2(id item1, id item2, void *context) {
 	[congratsLabel release];
 	[highScoresLabel release];
     [playingSurface release];
+    [bottomBar release];
 	
 	AudioServicesDisposeSystemSoundID(successSound);
     [super dealloc];

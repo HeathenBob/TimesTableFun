@@ -14,6 +14,7 @@
 #import "FEFootballTheme.h"
 #import "FEChooseNumberViewController.h"
 #import "FEName.h"
+#import "FEUtils.h"
 
 @implementation RootViewController
 
@@ -22,6 +23,7 @@
 @synthesize headerView;
 @synthesize footerView;
 @synthesize instructionLabel;
+@synthesize bottomBar;
 
 
 #pragma mark -
@@ -33,6 +35,7 @@
     [headerView release];
     [footerView release];
     [instructionLabel release];
+    [bottomBar release];
     [super dealloc];
 }
 
@@ -42,9 +45,12 @@
 	self.myDelegate.selectedTheme = [[[FEStarTheme alloc]init]autorelease];
 	self.title = @"Times Table Fun";
     
+    
+    
     NSString *welcomeString = NSLocalizedStringWithDefaultValue(@"Freya: Welcome to", @"Localizable", [NSBundle mainBundle], @"Hello - Welcome to Times Table Fun. Pick a theme", @"Hello - Welcome to Times Table Fun. Pick a theme");
 	[self.instructionLabel setText:welcomeString];
 	[self.instructionLabel setTextColor:[self.myDelegate.selectedTheme textColor]];
+    [self.bottomBar setBackgroundColor:[self.myDelegate.selectedTheme color6]];
 	[self.instructionLabel setBackgroundColor:[UIColor clearColor]];
     
 	[self.instructionLabel setNumberOfLines:0];
@@ -56,11 +62,28 @@
 }
 
 
-/*
+
 - (void)viewWillAppear:(BOOL)animated {
+    UINavigationBar *bar = self.navigationController.navigationBar;
+    if (bar != nil) {
+        if ([bar respondsToSelector:@selector(setBarTintColor:)]) {
+            [bar setBarTintColor:[self.myDelegate.selectedTheme color6]];
+            [bar setTintColor:[UIColor colorWithRed:215.0/255.0 green:215.0/255.0 blue:215.0/255.0 alpha:1.0]];
+            bar.titleTextAttributes = [NSDictionary dictionaryWithObject:[UIColor whiteColor] forKey:UITextAttributeTextColor];
+            [bar setTranslucent:NO];
+            [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent];
+        } else {
+            [bar setTintColor:[self.myDelegate.selectedTheme color6]];
+        }
+    }
+    if ( UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad ) {
+        [headerView setImage:[UIImage imageNamed:@"title-ipad.png"]];
+    } else {
+        [headerView setImage:[UIImage imageNamed:@"title.png"]];
+    }
     [super viewWillAppear:animated];
 }
-*/
+
 /*
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
@@ -87,6 +110,18 @@
 	return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
 
+- (BOOL)shouldAutorotate {
+    
+    UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
+    
+    if (orientation == UIInterfaceOrientationPortrait || [[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+       return YES;
+        
+    }
+    
+    return NO;
+}
+
 
 
 #pragma mark -
@@ -102,9 +137,9 @@
 
 - (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section {
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
-        return 0;
+        return 1;
     } else {
-        return 0;
+        return 1;
     }
 }
 
@@ -133,6 +168,11 @@
 	return footerView;
 }
  */
+
+- (UIView *)tableView:(UITableView *)tableView viewForFooterInSection:(NSInteger)section {
+    UIView *fView = [[[UIView alloc] initWithFrame:CGRectMake(0.0, 0.0, 320.0,1.0)] autorelease];
+    return fView;
+}
 
 // Customize the number of sections in the table view.
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
@@ -191,7 +231,7 @@
     }
 	
 	[cell setSelectedBackgroundView:self.myDelegate.tableBackgroundView];
-	[cell.textLabel setHighlightedTextColor:[self.myDelegate.selectedTheme color5]];
+	[cell.textLabel setHighlightedTextColor:[self.myDelegate.selectedTheme textColor]];
 	[cell.textLabel setTextColor:[self.myDelegate.selectedTheme textColor]];
 	 
     return cell;

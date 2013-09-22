@@ -29,6 +29,7 @@
 - (UIColor *) color5;
 - (UIColor *) color6;
 - (UIColor *) textColor;
+- (UIColor *) highlightTextColor;
 
 - (UIImage *) getNormalButtonImage;
 - (UIImage *) getSelectedButtonImage;

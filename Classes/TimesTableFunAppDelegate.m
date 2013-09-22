@@ -32,7 +32,7 @@
     // Override point for customization after application launch.
 	CGRect viewRect = CGRectMake(0.0f, 0.0f, 320.0f, 70.0f);
     self.tableBackgroundView = [[[UIView alloc ]initWithFrame:viewRect] autorelease];
-	[self.tableBackgroundView setBackgroundColor:[UIColor colorWithRed:0.851 green:0.906 blue:0.902 alpha:1.0]];
+	[self.tableBackgroundView setBackgroundColor:[UIColor colorWithRed:226.0/255.0 green:244.0/255.0 blue:244.0/255.0 alpha:1.0]];
 	NSString *usersName = [[NSUserDefaults standardUserDefaults] objectForKey:@"USER_NAME"];
 	if (usersName != nil) {
 		self.userName = usersName;
@@ -50,7 +50,7 @@
      */
     // Add the navigation controller's view to the window and display.
     [[UIApplication sharedApplication] setStatusBarHidden:NO withAnimation:NO];
-    [window addSubview:navigationController.view];
+    [self.window setRootViewController:navigationController];
     [window makeKeyAndVisible];
     
     return YES;
@@ -92,6 +92,17 @@
      Called when the application is about to terminate.
      See also applicationDidEnterBackground:.
      */
+}
+
+- (NSUInteger) application:(UIApplication *)application supportedInterfaceOrientationsForWindow:(UIWindow *)window {
+    
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+        //NSLog(@"returning all");
+        return UIInterfaceOrientationMaskAll;
+    } else {
+        //NSLog(@"returning portrait only");
+        return UIInterfaceOrientationMaskPortrait;
+    }
 }
 
 

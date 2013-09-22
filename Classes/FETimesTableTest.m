@@ -26,6 +26,8 @@
 @synthesize correctButton;
 @synthesize myDelegate;
 @synthesize score;
+@synthesize bottomView;
+@synthesize holderView;
 
 // The designated initializer. Override to perform setup that is required before the view is loaded.
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
@@ -44,28 +46,46 @@
  }
  */
 
-// Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
-- (void)viewDidLoad {
+- (void)viewWillAppear:(BOOL)animated {
+    UINavigationBar *bar = self.navigationController.navigationBar;
+    if (bar != nil) {
+        if ([bar respondsToSelector:@selector(setBarTintColor:)]) {
+            [bar setBarTintColor:[self.myDelegate.selectedTheme color1]];
+            [bar setTintColor:[UIColor colorWithRed:215.0/255.0 green:215.0/255.0 blue:215.0/255.0 alpha:1.0]];
+            bar.titleTextAttributes = [NSDictionary dictionaryWithObject:[UIColor whiteColor] forKey:UITextAttributeTextColor];
+            [bar setTranslucent:NO];
+            [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent];
+        } else {
+            [bar setTintColor:[self.myDelegate.selectedTheme color1]];
+        }
+    }
+    [self.bottomView setBackgroundColor:[self.myDelegate.selectedTheme color1]];
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+        
+        animationDuration = 3.0;
+    } else {
+        animationDuration = 1.5;
+    }
 	CGRect rect = self.correctButton.frame;
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
         rect.origin.x = 1030;
     } else {
-        rect.origin.x = 330;
+        rect.origin.x = 360;
     }
 	//rect.origin.y = 240;
 	self.correctButton.frame =rect;
 	self.score = 0;
 	[self.instructionLabel setTextColor:[self.myDelegate.selectedTheme textColor]];
-	[self.instructionLabel setHighlightedTextColor:[self.myDelegate.selectedTheme color1]];
+	[self.instructionLabel setHighlightedTextColor:[self.myDelegate.selectedTheme highlightTextColor]];
 	[self.view setBackgroundColor:[UIColor whiteColor]];
-	NSURL* audioFile = [NSURL fileURLWithPath:[[NSBundle mainBundle] 
-											   pathForResource:@"correct" 
-											   ofType:@"caf"]]; 
-	AudioServicesCreateSystemSoundID((CFURLRef)audioFile, &successSound); 
-	NSURL* audioFile2 = [NSURL fileURLWithPath:[[NSBundle mainBundle] 
-												pathForResource:@"wrong" 
-												ofType:@"caf"]]; 
-	AudioServicesCreateSystemSoundID((CFURLRef)audioFile2, &sorrySound); 
+	NSURL* audioFile = [NSURL fileURLWithPath:[[NSBundle mainBundle]
+											   pathForResource:@"correct"
+											   ofType:@"caf"]];
+	AudioServicesCreateSystemSoundID((CFURLRef)audioFile, &successSound);
+	NSURL* audioFile2 = [NSURL fileURLWithPath:[[NSBundle mainBundle]
+												pathForResource:@"wrong"
+												ofType:@"caf"]];
+	AudioServicesCreateSystemSoundID((CFURLRef)audioFile2, &sorrySound);
 	self.whichTable = self.myDelegate.selectedNumber;
 	timesByIndex = 0;
 	self.timesByValues = [NSMutableArray arrayWithCapacity:10];
@@ -77,35 +97,47 @@
 	self.numberButtons = [NSMutableArray arrayWithCapacity:10];
 	NSMutableArray *random10 = [self generateRandomAnswersArrayOfSize:10  forAnswer:(self.whichTable * timesBy)];
     
+    /*
     float yO = 100.0;
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
         yO = self.firstLabel.frame.origin.y + (2 * (self.firstLabel.frame.size.height));
     } else {
         yO = self.firstLabel.frame.origin.y + (self.firstLabel.frame.size.height) + 20.0;
     }
-    
-    float xO = 20.0;
+    */
+    //float xO = 20.0;
+    float holdery = 100.0;
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
-        xO = self.firstLabel.frame.origin.x;
+        //xO = self.firstLabel.frame.origin.x;
+        holdery = 150.0;
     }
+   
+    float holderx = 15.0;
     
 	for (int i = 0; i < 10; i++) {
-		FENumberButton *numberButton = [[FENumberButton alloc] initWithNumber:[[random10 objectAtIndex:i] intValue] andPosition:i andYOffset:yO andXOffset:xO andTheme:self.myDelegate.selectedTheme andParent:self];
+		FENumberButton *numberButton = [[FENumberButton alloc] initWithNumber:[[random10 objectAtIndex:i] intValue] andPosition:i andYOffset:holdery andXOffset:holderx andTheme:self.myDelegate.selectedTheme andParent:self];
 		
 		[numberButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
 		
 		[self.numberButtons addObject:numberButton];
 		[numberButton release];
-		[self.view addSubview:[self.numberButtons objectAtIndex:i]];
+		[self.holderView addSubview:[self.numberButtons objectAtIndex:i]];
 	}
-	[self.firstLabel setTextColor:[self.myDelegate.selectedTheme color1]];
-	[self.timesLabel setTextColor:[self.myDelegate.selectedTheme color1]];
-	[self.secondLabel setTextColor:[self.myDelegate.selectedTheme color1]];
-	[self.equalsLabel setTextColor:[self.myDelegate.selectedTheme color1]];
-	[self.answerSlot setTextColor:[self.myDelegate.selectedTheme color1]];
+	[self.firstLabel setTextColor:[self.myDelegate.selectedTheme color5]];
+	[self.timesLabel setTextColor:[self.myDelegate.selectedTheme color5]];
+	[self.secondLabel setTextColor:[self.myDelegate.selectedTheme color5]];
+	[self.equalsLabel setTextColor:[self.myDelegate.selectedTheme color5]];
+	[self.answerSlot setTextColor:[self.myDelegate.selectedTheme color5]];
 	
 	[self start];
-    [super viewDidLoad];
+
+    [super viewWillAppear:animated];
+}
+
+// Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
+- (void)viewDidLoad {
+    
+        [super viewDidLoad];
 }
 
 - (NSMutableArray *) generateRandomAnswersArrayOfSize:(NSInteger)arraySize forAnswer:(NSInteger)answer {
@@ -147,7 +179,7 @@
 	[self.highScoresLabel setText:@""];
 	NSString *dragText = NSLocalizedStringWithDefaultValue(@"Freya: drag", @"Localizable", [NSBundle mainBundle], @"Drag the correct answer on to the square", @"Drag the correct answer on to the square"); 
 	
-	[instructionLabel setText:dragText];
+	[self.instructionLabel setText:dragText];
 	[self.instructionLabel setHighlighted:NO];
 	[self.firstLabel setText:[NSString stringWithFormat:@"%i", whichTable]];
 	NSMutableArray *nextRandom10 = [self generateRandomAnswersArrayOfSize:10 forAnswer:(self.whichTable * timesBy)];
@@ -159,7 +191,7 @@
 		[[self.numberButtons objectAtIndex:i] setNumberValue:[[nextRandom10 objectAtIndex:i] intValue]];
 		[[self.numberButtons objectAtIndex:i] returnToOriginalPosition];
 		} @catch (NSException *e) {
-			[FEUtils debug :[NSString stringWithFormat:@"on loop ",i] withException: e];
+			[FEUtils debug :[NSString stringWithFormat:@"on loop %i",i] withException: e];
 		}
 	}
 	[self.secondLabel setText:[NSString stringWithFormat:@"%i", timesBy]];
@@ -167,9 +199,22 @@
 	if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
         rect.origin.x = 1030;
     } else {
-        rect.origin.x = 330;
+        rect.origin.x = 360;
     }
-	//rect.origin.y = 240;
+    float ybus = 100.0;
+    
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+        UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
+        if (UIInterfaceOrientationIsLandscape(orientation)) {
+            ybus = 25.0;
+        } else {
+            ybus = self.bottomView.frame.origin.y - (rect.size.height + 40.0);
+        }
+    } else {
+        ybus = self.bottomView.frame.origin.y - (rect.size.height + 20.0);
+    }
+    
+	rect.origin.y = ybus;
 	self.correctButton.frame =rect;
 	
 }
@@ -180,7 +225,7 @@
 			[[self.numberButtons objectAtIndex:i] removeFromSuperview];
 			
 		} @catch (NSException *e) {
-			[FEUtils debug :[NSString stringWithFormat:@"on loop ",i] withException: e];
+			[FEUtils debug :[NSString stringWithFormat:@"on loop %i",i] withException: e];
 		}
 	}
 	[self.firstLabel removeFromSuperview];
@@ -205,14 +250,27 @@
 	timesBy = [[self.timesByValues objectAtIndex:timesByIndex] intValue];
 	[UIView beginAnimations:nil context:nil];
 	[UIView setAnimationCurve:UIViewAnimationCurveEaseOut];
-	[UIView setAnimationDuration:1];
+	[UIView setAnimationDuration:animationDuration];
 	CGRect rect = self.correctButton.frame;
 	if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
         rect.origin.x = 1030;
     } else {
-        rect.origin.x = 330;
+        rect.origin.x = 360;
     }
-	//rect.origin.y = 240;
+	float ybus = 100.0;
+    
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+        UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
+        if (UIInterfaceOrientationIsLandscape(orientation)) {
+            ybus = 25.0;
+        } else {
+            ybus = self.bottomView.frame.origin.y - (rect.size.height + 40.0);
+        }
+    } else {
+        ybus = self.bottomView.frame.origin.y - (rect.size.height + 20.0);
+    }
+    
+	rect.origin.y = ybus;
 	self.correctButton.frame =rect;
 	[UIView commitAnimations];
 	[self start];
@@ -220,13 +278,14 @@
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
 	UITouch *touch = [touches anyObject];
-    currentTouch = [touch locationInView:self.view];
+    currentTouch = [touch locationInView:self.holderView];
 	for (int i = 0; i < [numberButtons count]; i++) {
 		FENumberButton *button = [numberButtons objectAtIndex:i];
 		if (currentTouch.x > button.frame.origin.x && currentTouch.x < (button.frame.origin.x + button.frame.size.width) && currentTouch.y > button.frame.origin.y && currentTouch.y < (button.frame.origin.y + button.frame.size.height)) {
 			touchedButton = button;
 			NSString *dragText = NSLocalizedStringWithDefaultValue(@"Freya: drag", @"Localizable", [NSBundle mainBundle], @"Drag the correct answer on to the square", @"Drag the correct answer on to the square"); 
 			[instructionLabel setText:dragText];
+            self.instructionLabel.highlighted = NO;
 			touchedButton.selected = YES;
 			touchOffsetX = currentTouch.x - button.frame.origin.x;
 			touchOffsetY = currentTouch.y - button.frame.origin.y;
@@ -238,7 +297,7 @@
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
 	UITouch *touch = [touches anyObject];
-    currentTouch = [touch locationInView:self.view];
+    currentTouch = [touch locationInView:self.holderView];
     if (touchedButton != nil) {
 		touchedButton.selected = YES;
 		CGRect rect = touchedButton.frame;
@@ -264,7 +323,7 @@
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
 	UITouch *touch = [touches anyObject];
-    currentTouch = [touch locationInView:self.view];
+    currentTouch = [touch locationInView:self.holderView];
 	if (touchedButton != nil) {
 		CGRect rect = touchedButton.frame;
 		rect.origin.x = currentTouch.x - touchOffsetX;
@@ -286,30 +345,34 @@
 				[self playSuccessSound];
 				self.score++;
 				if (timesByIndex < [self.timesByValues count]-1) {
+                    
 					self.correctButton.hidden = NO;
 					CGRect rect = self.correctButton.frame;
-					rect.origin.x = -200;
-					//rect.origin.y = 240;
+					rect.origin.x = -200.0;
+					float ybus = 100.0;
+                    
+                    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+                        UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
+                        if (UIInterfaceOrientationIsLandscape(orientation)) {
+                            ybus = 25.0;
+                        } else {
+                            ybus = self.bottomView.frame.origin.y - (rect.size.height + 40.0);
+                        }
+                    } else {
+                        ybus = self.bottomView.frame.origin.y - (rect.size.height + 20.0);
+                    }
+                    
+                    rect.origin.y = ybus;
 					self.correctButton.frame =rect;
                     [self.view bringSubviewToFront:self.correctButton];
 					[UIView beginAnimations:nil context:nil];
 					[UIView setAnimationCurve:UIViewAnimationCurveEaseOut];
-					[UIView setAnimationDuration:2];
-					rect.origin.x = self.answerSlot.frame.origin.x;
+					[UIView setAnimationDuration:animationDuration];
+					rect.origin.x = self.holderView.frame.origin.x + self.holderView.frame.size.width - self.correctButton.frame.size.width;
 					//rect.origin.y = 240;
 					
 					[instructionLabel setText:NSLocalizedStringWithDefaultValue(@"Freya: correct", @"Localizable", [NSBundle mainBundle], @"CORRECT - press next for another sum", @"CORRECT - press next for another sum") ];
 					[self.instructionLabel setHighlighted:YES];
-                    UIInterfaceOrientation orientation = [UIApplication sharedApplication].statusBarOrientation;
-                    if (orientation == UIInterfaceOrientationLandscapeLeft || orientation == UIInterfaceOrientationLandscapeRight) {
-                        if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
-                            for (int i = 0; i < 10; i++) {
-                                if([[self.numberButtons objectAtIndex:i] numberValue] != [touchedButton numberValue]) {
-                                    [[self.numberButtons objectAtIndex:i] setHidden:YES];
-                                }
-                            }
-                        }
-                    }
                     self.correctButton.frame =rect;
 					[UIView commitAnimations];
 				} else {
@@ -336,7 +399,7 @@
 			} else {
 				[UIView beginAnimations:nil context:nil];
 				[UIView setAnimationCurve:UIViewAnimationCurveEaseOut];
-				[UIView setAnimationDuration:1];
+				[UIView setAnimationDuration:animationDuration];
 				NSString *wrongText = NSLocalizedStringWithDefaultValue(@"Freya: wrong try again", @"Localizable", [NSBundle mainBundle], @"SORRY - Wrong answer, try again", @"SORRY - Wrong answer, try again"); 
 				[instructionLabel setText:wrongText];
 				[self.instructionLabel setHighlighted:YES];
@@ -356,6 +419,13 @@
 	}
 	NSString *scoreText = NSLocalizedStringWithDefaultValue(@"Label: score with score", @"Localizable", [NSBundle mainBundle], @"score:  %i", @"score:  %i"); 
 	[self.scoreLabel setText:[NSString stringWithFormat:scoreText,self.score]];
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+        [self.scoreLabel setBackgroundColor:[UIColor clearColor]];
+        [self.scoreLabel setTextColor:[self.myDelegate.selectedTheme textColor]];
+    } else {
+        [self.scoreLabel setBackgroundColor:[self.myDelegate.selectedTheme color5]];
+        [self.scoreLabel setTextColor:[self.myDelegate.selectedTheme textColor]];
+    }
 	touchedButton = nil;
 }
 
@@ -448,10 +518,10 @@ int memberSort3(id item1, id item2, void *context)
 	[self.highScoresLabel setTextColor:[UIColor clearColor]];
 	[UIView beginAnimations:nil context:nil];
 	[UIView setAnimationCurve:UIViewAnimationCurveEaseOut];
-	[UIView setAnimationDuration:10];
+	[UIView setAnimationDuration:animationDuration * 2.0];
 	[self.highScoresLabel setText:[scoreSummary description]];
-	[self.highScoresLabel setBackgroundColor:[self.myDelegate.selectedTheme color3]];
-	[self.highScoresLabel setTextColor:[UIColor blackColor]];
+	[self.highScoresLabel setBackgroundColor:[self.myDelegate.selectedTheme color5]];
+	[self.highScoresLabel setTextColor:[self.myDelegate.selectedTheme textColor]];
 	[UIView commitAnimations];
 	
 	[scoreSummary release];
@@ -471,13 +541,7 @@ int memberSort3(id item1, id item2, void *context)
 
 
 
-/*
- // Override to allow orientations other than the default portrait orientation.
- - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
- // Return YES for supported orientations
- return (interfaceOrientation == UIInterfaceOrientationPortrait);
- }
- */
+
 
 - (BOOL)textViewShouldBeginEditing:(UITextView *)textView {
 	return NO;
@@ -490,16 +554,66 @@ int memberSort3(id item1, id item2, void *context)
 	// Release any cached data, images, etc that aren't in use.
 }
 
-
+// ios5
 // Override to allow orientations other than the default portrait orientation.
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
     // Return YES for supported orientations
+    // LETS JUST ROTATE FOR IOS6+
+        return (interfaceOrientation == UIInterfaceOrientationPortrait);
+}
+
+- (BOOL)shouldAutorotate {
+    
+    UIInterfaceOrientation interfaceOrientation = [[UIApplication sharedApplication] statusBarOrientation];
+    
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+        
+        CGRect rect = self.correctButton.frame;
+        float ybus = 100.0;
+        
+        if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+            UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
+            if (UIInterfaceOrientationIsLandscape(orientation)) {
+                ybus = 25.0;
+            } else {
+                ybus = self.bottomView.frame.origin.y - (rect.size.height + 40.0);
+            }
+        } else {
+            ybus = self.bottomView.frame.origin.y - (rect.size.height + 20.0);
+        }
+        
+        rect.origin.y = ybus;
+        self.correctButton.frame = rect;
         return YES;
     } else {
         return (interfaceOrientation == UIInterfaceOrientationPortrait);
     }
 }
+
+- (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation {
+    //UIInterfaceOrientation interfaceOrientation = [[UIApplication sharedApplication] statusBarOrientation];
+    
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+        
+        CGRect rect = self.correctButton.frame;
+        float ybus = 100.0;
+        
+        if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+            UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
+            if (UIInterfaceOrientationIsLandscape(orientation)) {
+                ybus = 25.0;
+            } else {
+                ybus = self.bottomView.frame.origin.y - (rect.size.height + 40.0);
+            }
+        } else {
+            ybus = self.bottomView.frame.origin.y - (rect.size.height + 20.0);
+        }
+        
+        rect.origin.y = ybus;
+        self.correctButton.frame = rect;
+    }
+}
+
 
 - (void)viewDidUnload {
 	// Release any retained subviews of the main view.
@@ -521,6 +635,7 @@ int memberSort3(id item1, id item2, void *context)
 	[highScoresLabel release];
 	[scoreLabel release];
 	[correctButton release];
+    [holderView release];
 	AudioServicesDisposeSystemSoundID(successSound);
 	AudioServicesDisposeSystemSoundID(sorrySound);
     [super dealloc];

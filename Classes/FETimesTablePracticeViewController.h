@@ -33,6 +33,11 @@
 	IBOutlet UIView *slideView;
 	IBOutlet UILabel *slideViewLabel;
 	IBOutlet UIButton *slideViewButton;
+    IBOutlet UIView *titleView;
+    IBOutlet UIView *bottomView;
+    BOOL elementsRaised;
+    float animationDuration;
+    IBOutlet UIView *holderView;
 }
 
 @property (nonatomic, retain) TimesTableFunAppDelegate *myDelegate;
@@ -48,6 +53,10 @@
 @property (nonatomic, retain) IBOutlet UIView *slideView;
 @property (nonatomic, retain) IBOutlet UILabel *slideViewLabel;
 @property (nonatomic, retain) IBOutlet UIButton *slideViewButton;
+
+@property (nonatomic, retain) UIView *titleView;
+@property (nonatomic, retain) UIView *bottomView;
+@property (nonatomic, retain) UIView *holderView;
 
 - (void) start;
 - (IBAction) nextButtonClicked;

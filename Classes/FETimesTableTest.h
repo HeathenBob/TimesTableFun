@@ -36,6 +36,10 @@
 	IBOutlet UIButton *correctButton;
 	SystemSoundID successSound;
 	SystemSoundID sorrySound;
+    IBOutlet UIView *bottomView;
+    BOOL elementsRaised;
+    float animationDuration;
+    IBOutlet UIView *holderView;
 }
 
 @property (nonatomic, retain) TimesTableFunAppDelegate *myDelegate;
@@ -52,7 +56,9 @@
 @property (nonatomic, retain) IBOutlet UILabel *scoreLabel;
 @property (nonatomic, retain) IBOutlet UIButton *correctButton;
 @property (nonatomic) NSInteger whichTable;
+@property (nonatomic, retain) UIView *bottomView;
 @property NSInteger score;
+@property (nonatomic, retain) UIView *holderView;
 
 - (void) start;
 - (IBAction) nextButtonClicked;

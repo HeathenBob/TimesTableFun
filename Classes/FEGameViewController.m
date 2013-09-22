@@ -24,10 +24,11 @@
 @synthesize finishing;
 @synthesize instructionLabel;
 @synthesize highScoresLabel;
-@synthesize instructionImage;
+@synthesize freyaImage;
 @synthesize topBar;
 @synthesize bottomBar;
 @synthesize gamePaused;
+@synthesize stripeImage;
 
 
  // The designated initializer.  Override if you create the controller programmatically and want to perform customization that is not appropriate for viewDidLoad.
@@ -55,7 +56,7 @@
 												ofType:@"caf"]]; 
 	AudioServicesCreateSystemSoundID((CFURLRef)audioFile3, &oopsSound); 
 	[self.instructionLabel setTextColor:[self.myDelegate.selectedTheme textColor]];
-	[self.instructionLabel setHighlightedTextColor:[self.myDelegate.selectedTheme color4]];
+	[self.instructionLabel setHighlightedTextColor:[self.myDelegate.selectedTheme highlightTextColor]];
 	
 	NSString *restart = NSLocalizedStringWithDefaultValue(@"Button: start", @"Localizable", [NSBundle mainBundle], @"start", @"start");  
 	[self.startButton setTitle:restart forState:UIControlStateNormal];
@@ -66,7 +67,22 @@
 
 // Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
 - (void)viewWillAppear:(BOOL)animated {
-	[self.topBar setBackgroundColor:[self.myDelegate.selectedTheme color3]];
+    UINavigationBar *bar = self.navigationController.navigationBar;
+    if (bar != nil) {
+        if ([bar respondsToSelector:@selector(setBarTintColor:)]) {
+            [bar setBarTintColor:[self.myDelegate.selectedTheme color3]];
+            [bar setTintColor:[UIColor colorWithRed:40.0/255.0 green:40.0/255.0 blue:40.0/255.0 alpha:1.0]];
+            bar.titleTextAttributes = [NSDictionary dictionaryWithObject:[UIColor blackColor] forKey:UITextAttributeTextColor];
+            [bar setTranslucent:NO];
+            [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleDefault];
+        } else {
+            [bar setTintColor:[self.myDelegate.selectedTheme color3]];
+        }
+    }
+	//[self.topBar setBackgroundColor:[self.myDelegate.selectedTheme color3]];
+    [self.topBar setBackgroundColor:[UIColor colorWithRed:1.0 green:1.0 blue:1.0 alpha:0.8]];
+    [self.bottomBar setBackgroundColor:[self.myDelegate.selectedTheme color3]];
+    [self.instructionLabel setTextColor:[self.myDelegate.selectedTheme textColor]];
 	int selectedNum = self.myDelegate.selectedNumber;
 	if (selectedNum < 1) {
 		selectedNum = 1;
@@ -114,6 +130,10 @@
 			int highest = selectedNum * 10;
 			randomNum = arc4random()%highest;
 			randomNum++;
+            if (randomNum <= selectedNum) {
+                int timesBy = (arc4random()%8) + 2;
+                randomNum = (randomNum * timesBy) + selectedNum;
+            }
 			if (randomNum % selectedNum == 0) {
 				lastDivisible = 0;
 			} else {
@@ -122,6 +142,10 @@
 			
 		} else {
 			randomNum = randomNum * ((arc4random()%10) + 1);
+            if (randomNum == selectedNum) {
+                int timesBy = (arc4random()%9) + 2;
+                randomNum = randomNum * timesBy;
+            }
 			lastDivisible = 0;
 		}
 		
@@ -153,25 +177,16 @@
          forControlEvents:UIControlEventTouchDown];
 		
 	}
-	//[self.startButton removeFromSuperview];
-	//[self.scoreLabel removeFromSuperview];
-	//[self.instructionLabel removeFromSuperview];
-	//[self.instructionImage removeFromSuperview];
-	//[self.topBar removeFromSuperview];
-	
-	//[self.view addSubview:self.topBar];
-	//[self.view addSubview:self.startButton];
-	//[self.view addSubview:self.scoreLabel];
-	//[self.view addSubview:self.instructionImage];
-	//[self.view addSubview:self.instructionLabel];
-    
-    
+	   
     [self.view bringSubviewToFront:self.topBar];
-    [self.view bringSubviewToFront:self.startButton];
-    [self.view bringSubviewToFront:self.scoreLabel];
+    //[self.view bringSubviewToFront:self.startButton];
+    //[self.view bringSubviewToFront:self.scoreLabel];
     [self.view bringSubviewToFront:self.bottomBar];
-    [self.view bringSubviewToFront:self.instructionImage];
+    [self.view bringSubviewToFront:self.freyaImage];
     [self.view bringSubviewToFront:self.instructionLabel];
+    //[self.view bringSubviewToFront:self.freyaImage];
+    //[self.view bringSubviewToFront:self.instructionLabel];
+    [self.view bringSubviewToFront:self.stripeImage];
     
 	
 	self.mainTimer = [NSTimer scheduledTimerWithTimeInterval:0.1 target:self selector:@selector(moveFrame) userInfo:nil repeats:YES];
@@ -203,7 +218,7 @@
 				if (remainder == 0) {
 					self.outof++;
 				}
-				if (lastOne == -1 && self.outof >= 10 && self.finishing == NO) {
+				if (lastOne == -1 && self.outof >= 10 && self.finishing == 0) {
 					lastOne = i;
 					//NSLog(@"lastOne = %i", lastOne);
 				}
@@ -225,7 +240,9 @@
 				NSString *scoreLabelText = NSLocalizedStringWithDefaultValue(@"Label: Score short", @"Localizable", [NSBundle mainBundle], @"Score: %i", @"Score: %i"); 
 				NSString *scoreLabelTextOutOf = NSLocalizedStringWithDefaultValue(@"Label: Score out of", @"Localizable", [NSBundle mainBundle], @"Score: %i out of %i", @"Score: %i out of %i"); 
 				
-				if (finishing > 0 && i == finishing) {
+				if (self.finishing > 0 && i == finishing + 1) {
+                    
+
 					[mainTimer invalidate];
 					NSString *restart = NSLocalizedStringWithDefaultValue(@"Button: restart", @"Localizable", [NSBundle mainBundle], @"restart", @"restart");  
 					[self.startButton setTitle:restart forState:UIControlStateNormal];
@@ -251,7 +268,8 @@
 
 					}
 					[self.instructionLabel setHighlighted:YES];
-					[self recordHighScore];
+                    NSTimer *timer3 = [NSTimer scheduledTimerWithTimeInterval:0.1 target:self selector:@selector(recordHighScore:) userInfo:nil repeats:NO];
+					//[self recordHighScore];
 
 				} else {
 					[scoreLabel setText:[NSString stringWithFormat:scoreLabelText, self.score]];
@@ -270,7 +288,7 @@
 					[button removeFromSuperview];
 				}
 			}
-			finishing = lastOne;
+			self.finishing = lastOne;
 		}
 	}
 }
@@ -301,7 +319,8 @@ int memberSort(id item1, id item2, void *context)
 	return 0;
 }
 
-- (void) recordHighScore {
+- (void) recordHighScore:(NSTimer *)timer {
+    [timer invalidate];
 	NSString *highScoreText = NSLocalizedStringWithDefaultValue(@"High score: scored score on", @"Localizable", [NSBundle mainBundle], @"%1$@ scored %2$i on %3$@", @"%1$@ scored %2$i on %3$@"); 
 	NSString *highScoreTitle = NSLocalizedStringWithDefaultValue(@"High score: title", @"Localizable", [NSBundle mainBundle], @"HIGH SCORES:", @"HIGH SCORES:"); 
 	
@@ -491,13 +510,7 @@ static void completionCallback (SystemSoundID  mySSID, void* myself) {
 }
 
 
-/*
-// Override to allow orientations other than the default portrait orientation.
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
-    // Return YES for supported orientations
-    return (interfaceOrientation == UIInterfaceOrientationPortrait);
-}
-*/
+
 
 - (BOOL)textViewShouldBeginEditing:(UITextView *)textView {
 	return NO;
@@ -514,11 +527,20 @@ static void completionCallback (SystemSoundID  mySSID, void* myself) {
 // Override to allow orientations other than the default portrait orientation.
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
     // Return YES for supported orientations
-    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+    
+    return (interfaceOrientation == UIInterfaceOrientationPortrait);
+}
+
+- (BOOL)shouldAutorotate {
+    
+    UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
+    
+    if (orientation == UIInterfaceOrientationPortrait || [[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
         return YES;
-    } else {
-        return (interfaceOrientation == UIInterfaceOrientationPortrait);
+        
     }
+    
+    return NO;
 }
 
 - (void)viewDidUnload {
@@ -536,9 +558,10 @@ static void completionCallback (SystemSoundID  mySSID, void* myself) {
 	[scoreLabel release];
 	[instructionLabel release];
 	[highScoresLabel release];
-	[instructionImage release];
+	[freyaImage release];
 	[topBar release];
     [bottomBar release];
+    [stripeImage release];
 	AudioServicesDisposeSystemSoundID(successSound);
 	AudioServicesDisposeSystemSoundID(sorrySound);
 	AudioServicesDisposeSystemSoundID(oopsSound);

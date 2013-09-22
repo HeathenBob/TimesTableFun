@@ -39,13 +39,22 @@
             height = 40;
             gap = 4;
             leftSpace = xOffset;
-            fontSize = 28;
+            
+            if (number < 100) {
+                fontSize = 28;
+            } else {
+                fontSize = 20;
+            }
         } else {
             width = 20;
             height = 20;
             gap = 2;
             leftSpace = xOffset;
-            fontSize = 14;
+            if (number < 100) {
+                fontSize = 14;
+            } else {
+                fontSize = 10;
+            }
         }
 		self.numberValue = number;
 		self.font = [UIFont boldSystemFontOfSize:fontSize];

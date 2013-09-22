@@ -17,6 +17,8 @@
     IBOutlet UIButton *nextButton;
     IBOutlet UIView *layoutPanel;
     IBOutlet UIView *topBar;
+    IBOutlet UIView *bottomBar;
+    IBOutlet UIImageView *freyaImage;
     NSMutableArray *labels;
     int level;
     int buttonNumber;
@@ -25,6 +27,7 @@
 	SystemSoundID sorrySound;
     int score;
     BOOL beingPressed;
+    float animationDuration;
 }
 
 @property (nonatomic, retain) TimesTableFunAppDelegate *myDelegate;
@@ -33,7 +36,9 @@
 @property (nonatomic, retain) IBOutlet UIButton *nextButton;
 @property (nonatomic, retain) IBOutlet UIView *layoutPanel;
 @property (nonatomic, retain) IBOutlet UIView *topBar;
+@property (nonatomic, retain) IBOutlet UIView *bottomBar;
 @property (nonatomic, retain) NSTimer *buttonTimer;
+@property (nonatomic, retain) UIImageView *freyaImage;
 
 - (IBAction) countDownButtonClicked:(id)sender;
 - (IBAction) nextButtonClicked:(id)sender;

@@ -15,6 +15,7 @@
     IBOutlet UIImageView *footerView;
     IBOutlet UIImageView *headerView;
     IBOutlet UILabel *instructionLabel;
+    IBOutlet UIView *bottomBar;
 }
 
 @property (nonatomic, retain) UITableView *table;
@@ -22,5 +23,6 @@
 @property (nonatomic, retain) UIImageView *footerView;
 @property (nonatomic, retain) UIImageView *headerView;
 @property (nonatomic, retain) UILabel *instructionLabel;
+@property (nonatomic, retain) IBOutlet UIView *bottomBar;
 
 @end

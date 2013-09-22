@@ -30,6 +30,8 @@
 	IBOutlet UILabel *congratsLabel;
 	IBOutlet UITextView *highScoresLabel;
     IBOutlet UIView *playingSurface;
+    IBOutlet UIImageView *smileView;
+    IBOutlet UIView *bottomBar;
 	SystemSoundID successSound;
     
     float cardWidth;
@@ -57,6 +59,8 @@
 @property (nonatomic, retain) IBOutlet UILabel *congratsLabel;
 @property (nonatomic, retain) IBOutlet UITextView *highScoresLabel;
 @property (nonatomic, retain) IBOutlet UIView *playingSurface;
+@property (nonatomic, retain) IBOutlet UIImageView *smileView;
+@property (nonatomic, retain) IBOutlet UIView *bottomBar;
 
 
 - (void) deal;
@@ -67,6 +71,7 @@
 - (void) removeTwo;
 - (void) seeIfSame;
 - (void) recordHighScore;
+-(BOOL)isFourInchScreen;
 
 @end
 

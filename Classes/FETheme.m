@@ -42,7 +42,7 @@
 - (UIColor *) color1 { // red
 	return [UIColor colorWithRed:1.0 green:0.2 blue:0.4 alpha:1.0];
 }
-- (UIColor *) color2 { // orange
+- (UIColor *) color2 { // orange //pairs
 	return [UIColor colorWithRed:1.0 green:0.4 blue:0.2 alpha:1.0];
 }
 - (UIColor *) color3 { // yellow
@@ -51,15 +51,19 @@
 - (UIColor *) color4 { // magenta
 	return [UIColor colorWithRed:1.0 green:0.2 blue:0.8 alpha:1.0];
 }
-- (UIColor *) color5 { // light blue
+- (UIColor *) color5 { // light blue //learn
 	return [UIColor colorWithRed:0.2 green:0.8 blue:1.0 alpha:1.0];
 }
 - (UIColor *) color6 { // green
 	return [UIColor colorWithRed:0.2 green:0.8 blue:0.2 alpha:1.0];
 }
 - (UIColor *) textColor {
-	//return [UIColor colorWithRed:0.2 green:0.4 blue:1.0 alpha:1.0];
-	return [UIColor colorWithRed:0.0 green:0.2 blue:0.3 alpha:1.0];
+	return [UIColor colorWithRed:61.0/255.0 green:61.0/255.0 blue:61.0/255.0 alpha:1.0];
+	//return [UIColor colorWithRed:0.0 green:0.2 blue:0.3 alpha:1.0];
+}
+- (UIColor *) highlightTextColor {
+	return [UIColor colorWithRed:51.0/255.0 green:102.0/255.0 blue:204.0/255.0 alpha:1.0];
+	//return [UIColor colorWithRed:0.0 green:0.2 blue:0.3 alpha:1.0];
 }
 
 - (void) dealloc {

@@ -15,6 +15,7 @@
 	IBOutlet UILabel *instructionLabel;
 	IBOutlet UITextField *nameField;
 	IBOutlet UIButton *nextButton;
+    float animationDuration;
 }
 
 @property (nonatomic, retain) TimesTableFunAppDelegate *myDelegate;

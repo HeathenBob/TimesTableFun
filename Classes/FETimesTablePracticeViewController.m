@@ -23,6 +23,9 @@
 @synthesize slideView;
 @synthesize slideViewLabel;
 @synthesize slideViewButton;
+@synthesize titleView;
+@synthesize bottomView;
+@synthesize holderView;
 
 
 // The designated initializer. Override to perform setup that is required before the view is loaded.
@@ -43,23 +46,43 @@
 }
 */
 
-// Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
-- (void)viewDidLoad {
+- (void)viewWillAppear:(BOOL)animated {
+    UINavigationBar *bar = self.navigationController.navigationBar;
+    if (bar != nil) {
+        if ([bar respondsToSelector:@selector(setBarTintColor:)]) {
+            [bar setBarTintColor:[UIColor colorWithRed:255.0/255.0 green:45.0/255.0 blue:197.0/255.0 alpha:1.0]];
+            [bar setTintColor:[UIColor colorWithRed:215.0/255.0 green:215.0/255.0 blue:215.0/255.0 alpha:1.0]];
+            bar.titleTextAttributes = [NSDictionary dictionaryWithObject:[UIColor whiteColor] forKey:UITextAttributeTextColor];
+            [bar setTranslucent:NO];
+            [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent];
+        }
+    }
+    [self.slideView setBackgroundColor:[self.myDelegate.selectedTheme color5]];
+    [self.bottomView setBackgroundColor:[self.myDelegate.selectedTheme color4]];
+    [self.slideViewButton.titleLabel setTextColor:[self.myDelegate.selectedTheme color1]];
+    
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+        animationDuration = 2.0;
+    } else {
+        animationDuration = 1.5;
+    }
+    
 	CGRect rect = self.correctButton.frame;
 	rect.origin.x = -100;
 	//rect.origin.y = -100;
 	self.correctButton.frame = rect;
 	[self.view setBackgroundColor:[UIColor whiteColor]];
 	[self.instructionLabel setTextColor:[self.myDelegate.selectedTheme textColor]];
-	[self.instructionLabel setHighlightedTextColor:[self.myDelegate.selectedTheme color1]];
-	NSURL* audioFile = [NSURL fileURLWithPath:[[NSBundle mainBundle] 
-											   pathForResource:@"correct" 
-											   ofType:@"caf"]]; 
-	AudioServicesCreateSystemSoundID((CFURLRef)audioFile, &successSound); 
-	NSURL* audioFile2 = [NSURL fileURLWithPath:[[NSBundle mainBundle] 
-											   pathForResource:@"wrong" 
-											   ofType:@"caf"]]; 
-	AudioServicesCreateSystemSoundID((CFURLRef)audioFile2, &sorrySound); 
+	[self.instructionLabel setHighlightedTextColor:[self.myDelegate.selectedTheme highlightTextColor]];
+    self.instructionLabel.highlighted = NO;
+	NSURL* audioFile = [NSURL fileURLWithPath:[[NSBundle mainBundle]
+											   pathForResource:@"correct"
+											   ofType:@"caf"]];
+	AudioServicesCreateSystemSoundID((CFURLRef)audioFile, &successSound);
+	NSURL* audioFile2 = [NSURL fileURLWithPath:[[NSBundle mainBundle]
+                                                pathForResource:@"wrong"
+                                                ofType:@"caf"]];
+	AudioServicesCreateSystemSoundID((CFURLRef)audioFile2, &sorrySound);
 	self.whichTable = self.myDelegate.selectedNumber;
 	timesBy = 1;
 	self.numberButtons = [NSMutableArray arrayWithCapacity:10];
@@ -70,40 +93,55 @@
 	}
 	[self randomizeArray:random10];
     
-    float yO = 100.0;
+    /*
+     float yO = 100.0;
+     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+     yO = self.firstLabel.frame.origin.y + (2 * (self.firstLabel.frame.size.height));
+     } else {
+     yO = self.firstLabel.frame.origin.y + (self.firstLabel.frame.size.height) + 20.0;
+     }
+     */
+    //float xO = 20.0;
+    float holdery = 100.0;
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
-        yO = self.firstLabel.frame.origin.y + (2 * (self.firstLabel.frame.size.height));
-    } else {
-        yO = self.firstLabel.frame.origin.y + (self.firstLabel.frame.size.height) + 20.0;
+        //xO = self.firstLabel.frame.origin.x;
+        holdery = 150.0;
     }
     
-    float xO = 20.0;
-    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
-        xO = self.firstLabel.frame.origin.x;
-    }
+    float holderx = 15.0;
+    
 	for (int i = 0; i < 10; i++) {
-		FENumberButton *numberButton = [[FENumberButton alloc] initWithNumber:(NSInteger)whichTable * (i + 1) andPosition:[[random10 objectAtIndex:i] intValue] andYOffset:yO andXOffset:xO  andTheme:self.myDelegate.selectedTheme andParent:self];
+		FENumberButton *numberButton = [[FENumberButton alloc] initWithNumber:(NSInteger)whichTable * (i + 1) andPosition:[[random10 objectAtIndex:i] intValue]andYOffset:holdery andXOffset:holderx andTheme:self.myDelegate.selectedTheme andParent:self];
 		
 		[numberButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
 		
 		[self.numberButtons addObject:numberButton];
 		[numberButton release];
-		[self.view addSubview:[self.numberButtons objectAtIndex:i]];
+		[self.holderView addSubview:[self.numberButtons objectAtIndex:i]];
 	}
-	[self.firstLabel setTextColor:[self.myDelegate.selectedTheme color1]];
-	[self.timesLabel setTextColor:[self.myDelegate.selectedTheme color1]];
-	[self.secondLabel setTextColor:[self.myDelegate.selectedTheme color1]];
-	[self.equalsLabel setTextColor:[self.myDelegate.selectedTheme color1]];
-	[self.answerSlot setTextColor:[self.myDelegate.selectedTheme color1]];
-	  
+	[self.firstLabel setTextColor:[self.myDelegate.selectedTheme color5]];
+	[self.timesLabel setTextColor:[self.myDelegate.selectedTheme color5]];
+	[self.secondLabel setTextColor:[self.myDelegate.selectedTheme color5]];
+	[self.equalsLabel setTextColor:[self.myDelegate.selectedTheme color5]];
+	[self.answerSlot setTextColor:[self.myDelegate.selectedTheme color5]];
+    
+    
 	[self start];
-    [super viewDidLoad];
+
+    [super viewWillAppear:animated];
+}
+
+// Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
+- (void)viewDidLoad {
+    
+        [super viewDidLoad];
 }
 
 - (void) start {
 	self.correctButton.hidden = NO;
 	NSString *dragText = NSLocalizedStringWithDefaultValue(@"Freya: drag", @"Localizable", [NSBundle mainBundle], @"Drag the correct answer on to the square", @"Drag the correct answer on to the square"); 
 	[instructionLabel setText:dragText];
+    self.instructionLabel.highlighted = NO;
 	[self.firstLabel setText:[NSString stringWithFormat:@"%i", whichTable]];
 	for (int i = 0; i < 10; i++) {
         [[self.numberButtons objectAtIndex:i] setHidden:NO];
@@ -113,11 +151,32 @@
 		[[self.numberButtons objectAtIndex:i] returnToOriginalPosition];
 	}
 	[self.secondLabel setText:[NSString stringWithFormat:@"%i", timesBy]];
+    CGRect rect = self.correctButton.frame;
+	if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+        rect.origin.x = 1030;
+    } else {
+        rect.origin.x = 360;
+    }
+    float ybus = 100.0;
+    
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+        UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
+        if (UIInterfaceOrientationIsLandscape(orientation)) {
+            ybus = 22.0;
+        } else {
+            ybus = self.bottomView.frame.origin.y - (rect.size.height + 40.0);
+        }
+    } else {
+        ybus = self.bottomView.frame.origin.y - (rect.size.height + 20.0);
+    }
+    
+	rect.origin.y = ybus;
+	self.correctButton.frame =rect;
 	
 }
 
 - (void) alternateColor {
-	UIColor *colorToUse = [self.myDelegate.selectedTheme color1];
+	UIColor *colorToUse = [self.myDelegate.selectedTheme color2];
 	if (timesBy % 2 == 0) {
 		colorToUse = [self.myDelegate.selectedTheme color5];
 	}
@@ -138,30 +197,43 @@
 	timesBy++;
 	[UIView beginAnimations:nil context:nil];
 	[UIView setAnimationCurve:UIViewAnimationCurveEaseOut];
-	[UIView setAnimationDuration:1];
+	[UIView setAnimationDuration:animationDuration];
 	CGRect rect = self.correctButton.frame;
-    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
-        rect.origin.x = 1100;
+	if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+        rect.origin.x = 1030;
     } else {
-        rect.origin.x = 330;
+        rect.origin.x = 360;
     }
-	
-	//rect.origin.y = 240;
+	float ybus = 100.0;
+    
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+        UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
+        if (UIInterfaceOrientationIsLandscape(orientation)) {
+            ybus = 25.0;
+        } else {
+            ybus = self.bottomView.frame.origin.y - (rect.size.height + 40.0);
+        }
+    } else {
+        ybus = self.bottomView.frame.origin.y - (rect.size.height + 20.0);
+    }
+    
+	rect.origin.y = ybus;
 	self.correctButton.frame =rect;
-	[self alternateColor];
 	[UIView commitAnimations];
-	[self start];
+    [self alternateColor];
+    [self start];
 }
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
 	UITouch *touch = [touches anyObject];
-    currentTouch = [touch locationInView:self.view];
+    currentTouch = [touch locationInView:self.holderView];
 	for (int i = 0; i < [numberButtons count]; i++) {
 		FENumberButton *button = [numberButtons objectAtIndex:i];
 		if (currentTouch.x > button.frame.origin.x && currentTouch.x < (button.frame.origin.x + button.frame.size.width) && currentTouch.y > button.frame.origin.y && currentTouch.y < (button.frame.origin.y + button.frame.size.height)) {
 			touchedButton = button;
 			NSString *dragText = NSLocalizedStringWithDefaultValue(@"Freya: drag", @"Localizable", [NSBundle mainBundle], @"Drag the correct answer on to the square", @"Drag the correct answer on to the square"); 
 			[instructionLabel setText:dragText];
+            self.instructionLabel.highlighted = YES;
 			touchedButton.selected = YES;
 			touchOffsetX = currentTouch.x - button.frame.origin.x;
 			touchOffsetY = currentTouch.y - button.frame.origin.y;
@@ -175,7 +247,7 @@
     
     @try {
 	UITouch *touch = [touches anyObject];
-    currentTouch = [touch locationInView:self.view];
+    currentTouch = [touch locationInView:self.holderView];
 	if (touchedButton != nil) {
 		touchedButton.selected = YES;
 		CGRect rect = touchedButton.frame;
@@ -195,7 +267,7 @@
     
     @try {
 	UITouch *touch = [touches anyObject];
-    currentTouch = [touch locationInView:self.view];
+    currentTouch = [touch locationInView:self.holderView];
 	if (touchedButton != nil) {
 		CGRect rect = touchedButton.frame;
 		rect.origin.x = currentTouch.x - touchOffsetX;
@@ -224,13 +296,28 @@
 					CGRect rect = self.correctButton.frame;
 					rect.origin.x = -100;
 					//rect.origin.y = 240;
+                    float ybus = 100.0;
+                    
+                    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+                        UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
+                        if (UIInterfaceOrientationIsLandscape(orientation)) {
+                            ybus = 25.0;
+                        } else {
+                            ybus = self.bottomView.frame.origin.y - (rect.size.height + 40.0);
+                        }
+                    } else {
+                        ybus = self.bottomView.frame.origin.y - (rect.size.height + 20.0);
+                    }
+                    
+                    rect.origin.y = ybus;
 					self.correctButton.frame =rect;
-					[UIView setAnimationDuration:2];
+					[UIView setAnimationDuration:animationDuration];
                     
 					
 					NSString *correctText = NSLocalizedStringWithDefaultValue(@"Freya: correct", @"Localizable", [NSBundle mainBundle], @"CORRECT - press next for another sum", @"CORRECT - press next for another sum"); 
 					
 					[instructionLabel setText:correctText];
+                    self.instructionLabel.highlighted = YES;
                     UIInterfaceOrientation orientation = [UIApplication sharedApplication].statusBarOrientation;
                     if (orientation == UIInterfaceOrientationLandscapeLeft || orientation == UIInterfaceOrientationLandscapeRight) {
                         if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
@@ -242,20 +329,27 @@
                         }
                     }
                     //CGRect rect = self.correctButton.frame;
-					rect.origin.x = answerSlot.frame.origin.x;
+					rect.origin.x = self.holderView.frame.origin.x + self.holderView.frame.size.width - self.correctButton.frame.size.width;
 					//rect.origin.y = 240;
 					self.correctButton.frame =rect;
 				} else {
-					[UIView setAnimationDuration:2];
+                    CGRect rect = self.slideView.frame;
+                    CGRect screenBounds = [[UIScreen mainScreen] bounds];
+                    rect.size.height = screenBounds.size.height - 64.0;
+                    rect.origin.y = (screenBounds.size.height - 64.0) * -1;
+                    self.slideView.frame = rect;
+					[UIView setAnimationDuration:animationDuration];
 					for (int i = 0; i < 10; i++) {
 						[[self.numberButtons objectAtIndex:i] setHidden:YES];
 					}
-					CGRect rect = self.slideView.frame;
+					
 					rect.origin.y = 0;
+                    
 					self.slideView.frame = rect;
 					NSString *correctText2 = NSLocalizedStringWithDefaultValue(@"Freya: correct done", @"Localizable", [NSBundle mainBundle], @"CORRECT - well done", @"CORRECT - well done"); 
 					
 					[instructionLabel setText:correctText2];
+                    self.instructionLabel.highlighted = YES;
 				}
 
 				
@@ -263,10 +357,11 @@
 			} else {
 				[UIView beginAnimations:nil context:nil];
 				[UIView setAnimationCurve:UIViewAnimationCurveEaseOut];
-				[UIView setAnimationDuration:1];
+				[UIView setAnimationDuration:animationDuration];
 				NSString *wrongText = NSLocalizedStringWithDefaultValue(@"Freya: wrong try again", @"Localizable", [NSBundle mainBundle], @"SORRY - Wrong answer, try again", @"SORRY - Wrong answer, try again"); 
 				
 				[instructionLabel setText:wrongText];
+                self.instructionLabel.highlighted = YES;
 				touchedButton.enabled = NO;
 				[self playSorrySound];
 				[touchedButton returnToOriginalPosition];
@@ -312,12 +407,39 @@
 // Override to allow orientations other than the default portrait orientation.
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
     // Return YES for supported orientations
+    return (interfaceOrientation == UIInterfaceOrientationPortrait);
+}
+
+- (BOOL)shouldAutorotate {
+    UIInterfaceOrientation interfaceOrientation = [[UIApplication sharedApplication] statusBarOrientation];
+    
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
         return YES;
     } else {
         return (interfaceOrientation == UIInterfaceOrientationPortrait);
     }
+    
 }
+- (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation {
+    
+    CGRect rect = self.correctButton.frame;
+    float ybus = 100.0;
+    
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+        UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
+        if (UIInterfaceOrientationIsLandscape(orientation)) {
+            ybus = 25.0;
+        } else {
+            ybus = self.bottomView.frame.origin.y - (rect.size.height + 40.0);
+        }
+    } else {
+        ybus = self.bottomView.frame.origin.y - (rect.size.height + 20.0);
+    }
+    
+    rect.origin.y = ybus;
+    self.correctButton.frame = rect;
+}
+
 
 - (void)viewDidUnload {
 	// Release any retained subviews of the main view.
@@ -338,6 +460,8 @@
 	[slideView release];
 	[slideViewLabel release];
 	[slideViewButton release];
+    [titleView release];
+    [holderView release];
 	AudioServicesDisposeSystemSoundID(successSound);
 	AudioServicesDisposeSystemSoundID(sorrySound);
     [super dealloc];

@@ -30,20 +30,31 @@
 }
 
 
-/*
+
 // Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
 - (void)viewDidLoad {
     [super viewDidLoad];
+    
 }
-*/
 
-/*
-// Override to allow orientations other than the default portrait orientation.
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
-    // Return YES for supported orientations
-    return (interfaceOrientation == UIInterfaceOrientationPortrait);
+- (void)viewWillAppear:(BOOL)animated {
+    UINavigationBar *bar = self.navigationController.navigationBar;
+    if (bar != nil) {
+        if ([bar respondsToSelector:@selector(setBarTintColor:)]) {
+            [bar setBarTintColor:[self.myDelegate.selectedTheme color6]];
+            [bar setTintColor:[UIColor colorWithRed:215.0/255.0 green:215.0/255.0 blue:215.0/255.0 alpha:1.0]];
+            bar.titleTextAttributes = [NSDictionary dictionaryWithObject:[UIColor whiteColor] forKey:UITextAttributeTextColor];
+            [bar setTranslucent:NO];
+            [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent];
+        } else {
+            [bar setTintColor:[self.myDelegate.selectedTheme color6]];
+        }
+    }
+    [super viewWillAppear:animated];
 }
-*/
+
+
+
 
 #pragma mark -
 #pragma mark Table view data source
@@ -83,8 +94,8 @@
     
 	if (indexPath.row == 0) {
         [cell.textLabel setText:learnTitle];
-		[cell.textLabel setTextColor:[self.myDelegate.selectedTheme color2]];
-		[cell.textLabel setHighlightedTextColor:[self.myDelegate.selectedTheme color2]];
+		[cell.textLabel setTextColor:[self.myDelegate.selectedTheme color5]];
+		[cell.textLabel setHighlightedTextColor:[self.myDelegate.selectedTheme color5]];
 		[cell.detailTextLabel setText:learnDetail];
 
     } else if (indexPath.row == 1) {
@@ -94,17 +105,17 @@
 		[cell.detailTextLabel setText:practiceDetail];
 	} else 	if (indexPath.row == 2) {
 		[cell.textLabel setText:gameTitle];
-		[cell.textLabel setTextColor:[self.myDelegate.selectedTheme color5]];
-		[cell.textLabel setHighlightedTextColor:[self.myDelegate.selectedTheme color5]];
+		[cell.textLabel setTextColor:[self.myDelegate.selectedTheme color3]];
+		[cell.textLabel setHighlightedTextColor:[self.myDelegate.selectedTheme color3]];
 		[cell.detailTextLabel setText:gameDetail];
 	} else if (indexPath.row == 3) {
 		[cell.textLabel setText:pairsTitle];
-		[cell.textLabel setTextColor:[self.myDelegate.selectedTheme color3]];
-		[cell.textLabel setHighlightedTextColor:[self.myDelegate.selectedTheme color3]];
+		[cell.textLabel setTextColor:[self.myDelegate.selectedTheme color2]];
+		[cell.textLabel setHighlightedTextColor:[self.myDelegate.selectedTheme color2]];
 		[cell.detailTextLabel setText:pairsDetail];
 	} else if (indexPath.row == 4) {
 		[cell.textLabel setText:testTitle];
-		[cell.textLabel setTextColor:[self.myDelegate.selectedTheme color6]];
+		[cell.textLabel setTextColor:[self.myDelegate.selectedTheme color1]];
 		[cell.textLabel setHighlightedTextColor:[self.myDelegate.selectedTheme color6]];
 		[cell.detailTextLabel setText:testDetail];
 	} 
@@ -200,11 +211,18 @@
 // Override to allow orientations other than the default portrait orientation.
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
     // Return YES for supported orientations
+    return (interfaceOrientation == UIInterfaceOrientationPortrait);
+}
+
+- (BOOL)shouldAutorotate {
+    UIInterfaceOrientation interfaceOrientation = [[UIApplication sharedApplication] statusBarOrientation];
+    
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
         return YES;
     } else {
         return (interfaceOrientation == UIInterfaceOrientationPortrait);
     }
+    
 }
 
 - (void)didReceiveMemoryWarning {
